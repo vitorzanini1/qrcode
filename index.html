@@ -34,6 +34,7 @@
             display: block;
             text-align: left;
             margin-bottom: 5px;
+            font-weight: bold;
         }
 
         input {
@@ -64,10 +65,11 @@
             font-size: 16px;
             cursor: pointer;
             margin-top: 10px;
+            transition: background-color 0.3s;
         }
 
-        #generate-btn {
-            margin-right: 10px;
+        #generate-btn:hover, #print-btn:hover, #scan-btn:hover {
+            background-color: #0056b3;
         }
 
         /* Estilo para os avisos */
@@ -99,10 +101,6 @@
 
             #generate-btn, #print-btn, #scan-btn {
                 width: 100%;
-            }
-
-            #registrationForm {
-                overflow: hidden;
             }
         }
     </style>
