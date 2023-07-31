@@ -3,72 +3,9 @@
 <head>
     <title>Gerador e Scanner de QR Code</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
+        /* Estilos existentes */
 
-        header {
-            background-color: #007BFF;
-            color: #fff;
-            padding: 10px 0;
-        }
-
-        h1 {
-            margin: 0;
-        }
-
-        form {
-            max-width: 600px;
-            margin: 40px auto;
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        label {
-            display: block;
-            text-align: left;
-            margin-bottom: 5px;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-
-        #qrcode-container {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        #qrcode {
-            width: 256px;
-            height: 256px;
-        }
-
-        #generate-btn, #print-btn, #scan-btn {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        #generate-btn {
-            margin-right: 10px;
-        }
+        /* ... */
 
         /* Estilo para os avisos */
         .success-message {
@@ -93,12 +30,16 @@
 
             #qrcode {
                 width: 90%;
-                max-width: 300px;
+                max-width: 256px;
                 height: auto;
             }
 
-            #generate-btn, #print-btn, #scan-btn {
-                width: 100%;
+            #scan-btn {
+                margin-top: 20px;
+            }
+
+            #scanner {
+                display: none;
             }
         }
     </style>
@@ -142,105 +83,37 @@
         <video id="video"></video>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/gh/david    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/instascan@1.0.1/instascan.min.js"></script>
     <script>
-        // Função para gerar o QR Code
         function generateQRCode() {
-            const formData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                cpf: document.getElementById('cpf').value,
-                city: document.getElementById('city').value,
-                school: document.getElementById('school').value,
-            };
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const cpf = document.getElementById('cpf').value;
+            const city = document.getElementById('city').value;
+            const school = document.getElementById('school').value;
+            const data = { name, email, phone, cpf, city, school };
+            const jsonData = JSON.stringify(data);
+            const qrcodeDiv = document.getElementById('qrcode');
 
-            // Verifica se todos os campos foram preenchidos
-            const values = Object.values(formData);
-            if (values.includes('')) {
-                displayErrorMessage();
-                return;
-            }
+            qrcodeDiv.innerHTML = '';
 
-            // Converte o objeto formData em uma string JSON
-            const jsonString = JSON.stringify(formData);
-
-            // Cria o QR Code usando a biblioteca qrcode.js
-            const qrcode = new QRCode(document.getElementById('qrcode'), {
-                text: jsonString,
+            const qrcode = new QRCode(qrcodeDiv, {
+                text: jsonData,
                 width: 256,
                 height: 256,
             });
-
-            displaySuccessMessage();
         }
 
-        // Função para imprimir o QR Code
         function printQRCode() {
-            const qrcodeCanvas = document.querySelector('#qrcode canvas');
-            const qrcodeDataURL = qrcodeCanvas.toDataURL('image/png');
-
-            const printWindow = window.open('', '_blank');
-            printWindow.document.open();
-            printWindow.document.write(`<img src="${qrcodeDataURL}" style="max-width: 100%;" />`);
-            printWindow.document.close();
-
-            printWindow.print();
-        }
-
-        // Função para exibir a mensagem de sucesso
-        function displaySuccessMessage() {
-            const successMessage = document.getElementById('successMessage');
-            const errorMessage = document.getElementById('errorMessage');
-
-            successMessage.style.display = 'block';
-            errorMessage.style.display = 'none';
-        }
-
-        // Função para exibir a mensagem de erro
-        function displayErrorMessage() {
-            const successMessage = document.getElementById('successMessage');
-            const errorMessage = document.getElementById('errorMessage');
-
-            successMessage.style.display = 'none';
-            errorMessage.style.display = 'block';
-        }
-
-        // Função para escanear o QR Code usando a câmera
-        function scanQRCode() {
-            const scannerDiv = document.getElementById('scanner');
-            const scanner = new Instascan.Scanner({ video: document.getElementById('video') });
-
-            scanner.addListener('scan', function (content) {
-                // Conteúdo escaneado (JSON) é convertido em um objeto JavaScript
-                const formData = JSON.parse(content);
-
-                // Preenche os campos do formulário com os dados escaneados
-                document.getElementById('name').value = formData.name || '';
-                document.getElementById('email').value = formData.email || '';
-                document.getElementById('phone').value = formData.phone || '';
-                document.getElementById('cpf').value = formData.cpf || '';
-                document.getElementById('city').value = formData.city || '';
-                document.getElementById('school').value = formData.school || '';
-
-                // Fecha o escaneamento
-                scannerDiv.style.display = 'none';
-            });
-
-            // Ativa a câmera para escanear
-            Instascan.Camera.getCameras().then(function (cameras) {
-                if (cameras.length > 0) {
-                    scanner.start(cameras[0]);
-                } else {
-                    console.error('Nenhuma câmera encontrada.');
-                }
-            });
-
-            // Exibe a div para escanear
-            scannerDiv.style.display = 'block';
+            const qrcodeDiv = document.getElementById('qrcode');
+            const printContents = qrcodeDiv.innerHTML;
+            const originalContents = document.body.innerHTML;
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
         }
     </script>
 </body>
 </html>
-
