@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gerador de QR Code</title>
+    <title>Gerador e Scanner de QR Code</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -55,7 +55,7 @@
             height: 256px;
         }
 
-        #generate-btn, #print-btn {
+        #generate-btn, #print-btn, #scan-btn {
             padding: 10px 20px;
             background-color: #007BFF;
             color: #fff;
@@ -69,13 +69,47 @@
         #generate-btn {
             margin-right: 10px;
         }
+
+        /* Estilo para os avisos */
+        .success-message {
+            color: #008000;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            color: #FF0000;
+            margin-bottom: 10px;
+        }
+
+        /* Estilos responsivos */
+        @media (max-width: 600px) {
+            form {
+                max-width: 90%;
+            }
+
+            #qrcode-container {
+                flex-direction: column;
+            }
+
+            #qrcode {
+                width: 90%;
+                max-width: 256px;
+                height: auto;
+            }
+
+            #scan-btn {
+                margin-top: 20px;
+            }
+
+            #scanner {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>TEST
-
-        </h1>
+        <h1>Gerador e Scanner de QR Code</h1>
     </header>
     <form id="registrationForm">
         <label for="name">Nome:</label>
@@ -98,12 +132,23 @@
 
         <button type="button" id="generate-btn" onclick="generateQRCode()">Gerar QR Code</button>
         <button type="button" id="print-btn" onclick="printQRCode()">Imprimir QR Code</button>
+        <button type="button" id="scan-btn" onclick="scanQRCode()">Escanear QR Code</button>
+
+        <!-- Avisos -->
+        <div class="success-message" id="successMessage" style="display: none;">QR Code gerado com sucesso!</div>
+        <div class="error-message" id="errorMessage" style="display: none;">Ocorreu um erro ao gerar o QR Code. Por favor, preencha todos os campos.</div>
     </form>
     <div id="qrcode-container">
         <div id="qrcode"></div>
     </div>
 
+    <div id="scanner" style="display: none;">
+        <video id="video"></video>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/instascan@1.0.1/instascan.min.js"></script>
+    
     <script>
         function generateQRCode() {
             const name = document.getElementById('name').value;
