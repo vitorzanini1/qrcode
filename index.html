@@ -103,12 +103,28 @@
         }
     </style>
 </head>
-<header>
+<body>
+    <header>
         <h1>Gerador e Scanner de QR Code</h1>
     </header>
     <form id="registrationForm">
-        <!-- Campos do formulário aqui -->
-        <!-- ... -->
+        <label for="name">Nome:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="phone">Telefone:</label>
+        <input type="tel" id="phone" name="phone" pattern="[0-9]{10,11}" required>
+
+        <label for="cpf">CPF:</label>
+        <input type="text" id="cpf" name="cpf" pattern="[0-9]{11}" required>
+
+        <label for="city">Cidade:</label>
+        <input type="text" id="city" name="city" required>
+
+        <label for="school">Escola:</label>
+        <input type="text" id="school" name="school" required>
 
         <button type="button" id="generate-btn" onclick="generateQRCode()">Gerar QR Code</button>
         <button type="button" id="print-btn" onclick="printQRCode()">Imprimir QR Code</button>
@@ -126,38 +142,105 @@
         <video id="video"></video>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/david    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/instascan@1.0.1/instascan.min.js"></script>
-    
     <script>
+        // Função para gerar o QR Code
         function generateQRCode() {
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const cpf = document.getElementById('cpf').value;
-            const city = document.getElementById('city').value;
-            const school = document.getElementById('school').value;
-            const data = { name, email, phone, cpf, city, school };
-            const jsonData = JSON.stringify(data);
-            const qrcodeDiv = document.getElementById('qrcode');
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                cpf: document.getElementById('cpf').value,
+                city: document.getElementById('city').value,
+                school: document.getElementById('school').value,
+            };
 
-            qrcodeDiv.innerHTML = '';
+            // Verifica se todos os campos foram preenchidos
+            const values = Object.values(formData);
+            if (values.includes('')) {
+                displayErrorMessage();
+                return;
+            }
 
-            const qrcode = new QRCode(qrcodeDiv, {
-                text: jsonData,
+            // Converte o objeto formData em uma string JSON
+            const jsonString = JSON.stringify(formData);
+
+            // Cria o QR Code usando a biblioteca qrcode.js
+            const qrcode = new QRCode(document.getElementById('qrcode'), {
+                text: jsonString,
                 width: 256,
                 height: 256,
             });
+
+            displaySuccessMessage();
         }
 
+        // Função para imprimir o QR Code
         function printQRCode() {
-            const qrcodeDiv = document.getElementById('qrcode');
-            const printContents = qrcodeDiv.innerHTML;
-            const originalContents = document.body.innerHTML;
-            document.body.innerHTML = printContents;
-            window.print();
-            document.body.innerHTML = originalContents;
+            const qrcodeCanvas = document.querySelector('#qrcode canvas');
+            const qrcodeDataURL = qrcodeCanvas.toDataURL('image/png');
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.open();
+            printWindow.document.write(`<img src="${qrcodeDataURL}" style="max-width: 100%;" />`);
+            printWindow.document.close();
+
+            printWindow.print();
+        }
+
+        // Função para exibir a mensagem de sucesso
+        function displaySuccessMessage() {
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        // Função para exibir a mensagem de erro
+        function displayErrorMessage() {
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'block';
+        }
+
+        // Função para escanear o QR Code usando a câmera
+        function scanQRCode() {
+            const scannerDiv = document.getElementById('scanner');
+            const scanner = new Instascan.Scanner({ video: document.getElementById('video') });
+
+            scanner.addListener('scan', function (content) {
+                // Conteúdo escaneado (JSON) é convertido em um objeto JavaScript
+                const formData = JSON.parse(content);
+
+                // Preenche os campos do formulário com os dados escaneados
+                document.getElementById('name').value = formData.name || '';
+                document.getElementById('email').value = formData.email || '';
+                document.getElementById('phone').value = formData.phone || '';
+                document.getElementById('cpf').value = formData.cpf || '';
+                document.getElementById('city').value = formData.city || '';
+                document.getElementById('school').value = formData.school || '';
+
+                // Fecha o escaneamento
+                scannerDiv.style.display = 'none';
+            });
+
+            // Ativa a câmera para escanear
+            Instascan.Camera.getCameras().then(function (cameras) {
+                if (cameras.length > 0) {
+                    scanner.start(cameras[0]);
+                } else {
+                    console.error('Nenhuma câmera encontrada.');
+                }
+            });
+
+            // Exibe a div para escanear
+            scannerDiv.style.display = 'block';
         }
     </script>
 </body>
 </html>
+
